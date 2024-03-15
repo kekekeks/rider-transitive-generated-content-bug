@@ -1,0 +1,41 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <UpToDateCheckInput Include="content.txt" />
+        <None Include="content.txt"/>
+    </ItemGroup>
+
+    <PropertyGroup Condition="'$(DesignTimeBuild)' != 'true'">
+        <CoreCompileDependsOn>GenerateExtraContentItems;$(CoreCompileDependsOn)</CoreCompileDependsOn>
+    </PropertyGroup>
+    <Target Name="GenerateExtraContentItems" DependsOnTargets="PopulateExtraContentItems"
+        Inputs="content.txt" Outputs="$(IntermediateOutputPath)/test.txt">
+        <ReadLinesFromFile File="content.txt" >
+            <Output
+                    TaskParameter="Lines"
+                    ItemName="FileLines"/>
+        </ReadLinesFromFile>
+        <ItemGroup>
+            <FileLines Include="extra line"/>
+            <FileWrites Include="$(IntermediateOutputPath)/test.txt"/>
+        </ItemGroup>
+        <WriteLinesToFile Overwrite="true" File="$(IntermediateOutputPath)/test.txt" Lines="@(FileLines)" />        
+    </Target>
+    
+    <PropertyGroup>
+        <GetCopyToOutputDirectoryItemsDependsOn>$(GetCopyToOutputDirectoryItemsDependsOn);PopulateExtraContentItems</GetCopyToOutputDirectoryItemsDependsOn>
+    </PropertyGroup>
+    
+    <Target Name="PopulateExtraContentItems" AfterTargets="AssignTargetPaths">
+        <ItemGroup>
+            <ContentWithTargetPath Include="$(IntermediateOutputPath)/test.txt" 
+                                   TargetPath="test.txt"
+                                   CopyToOutputDirectory="Always"
+            />
+        </ItemGroup>
+    </Target>
+
+</Project>
